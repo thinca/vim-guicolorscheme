@@ -14,6 +14,8 @@ if exists('g:loaded_guicolorscheme')
 endif
 let g:loaded_guicolorscheme = 1
 
+let s:save_cpo = &cpo
+set cpo&vim
 
 
 " conversion functions {{{
@@ -316,5 +318,8 @@ function! s:GuiColorScheme(fname)
         endif
     endfor
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
 
 " vim:ft=vim:fdl=0:fdm=marker:ts=4:sw=4

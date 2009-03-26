@@ -1,7 +1,8 @@
 " guicolorscheme.vim: Convert GUI only color schems
 "
-" Maintainer:	 Aaron Griffin <aaron@archlinux.org>
-" Last Modified: Mon Feb 26 22:52:34 UTC 2007
+" Maintainer:    Aaron Griffin <aaron@archlinux.org>
+" Modified By:   thinca <thinca@gmail.com>
+" Last Modified: 2009-03-26T22:06:48+09:00
 " Version:       1.2
 " URL:           http://www.vim.org/script.php?script_id=39
 "
@@ -258,65 +259,57 @@ function! s:GuiColorScheme(fname)
         return 0
     endif
 
-    for line in readfile(l:file)
-        if line =~ '\s*hi'
-            let l:name = ""
-            let l:fg = ""
-            let l:bg = ""
-            let l:attr = ""
+    let lines = readfile(file)
 
-            " get highlight name
-            let l:start = match(line, "hi")
-            let l:end = match(line, "[ \t]", l:start)
-            let l:start = l:end +1
-            let l:end = match(line, "[ \t]", l:start)
-            let l:name = strpart(line, l:start, l:end - l:start)
-
-            " strip foreground color
-            let l:start = match(line, "guifg=")
-            if l:start != -1
-                let l:start = l:start + 6 "strlen(guifg=)
-                let l:end = match(line, "[ \t]", l:start)
-                if l:end == -1
-                    let l:fg = strpart(line, l:start)
-                else
-                    let l:fg = strpart(line, l:start, l:end - l:start)
-                endif
-                if strpart(l:fg, 0, 1) == "#"
-                    let l:fg = strpart(l:fg, 1)
-                endif
-            endif
-
-            " strip background color
-            let l:start = match(line, "guibg=")
-            if l:start != -1
-                let l:start = l:start + 6 "strlen(guibg=)
-                let l:end = match(line, "[ \t]", l:start)
-                if l:end == -1
-                    let l:bg = strpart(line, l:start)
-                else
-                    let l:bg = strpart(line, l:start, l:end - l:start)
-                endif
-                if strpart(l:bg, 0, 1) == "#"
-                    let l:bg = strpart(l:bg, 1)
-                endif
-            endif
-
-            " strip attribute
-            let l:start = match(line, "gui=")
-            if l:start != -1
-                let l:start = l:start + 4 "strlen(gui=)
-                let l:end = match(line, "[ \t]", l:start)
-                if l:end == -1
-                    let l:attr = strpart(line, l:start)
-                else
-                    let l:attr = strpart(line, l:start, l:end - l:start)
-                endif
-            endif
-
-            call s:HL(l:name, l:fg, l:bg, l:attr)
+    " Remove line continuation.
+    let i = 1
+    while i < len(lines)
+        if lines[i] =~ '^\s*\\'
+            let lines[i - 1] .= substitute(lines[i], '\s*\\', '', '')
+            unlet lines[i]
+        else
+            let i += 1
         endif
-    endfor
+    endwhile
+
+    let i = 0
+    while i < len(lines)
+        let hi = matchstr(lines[i], '^\s*:\?\s*hi\%[ghlight]\>.*')
+        if hi == ''
+            let i += 1
+            continue
+        endif
+
+        " Split to parts.
+        " 'hi Normal    guifg=#ffffff     guibg=#050505'
+        " => ['hi', 'Normal', 'guifg=#ffffff', 'guibg=#050505']
+        let parts = split(hi, '\v%(\S+\s*\=\s*%(''[^'']*''|\S+)|\w+)\zs\s*')
+
+        " gui => cterm
+        for type in ['bg', 'fg', '']
+            let pos = match(parts, '^gui' . type . '\s*=')
+            if pos < 0
+                continue
+            endif
+            let rhs = matchstr(parts[pos], '^\w*\s*=\s*\zs.*')
+            if rhs =~ '#\x\{6}'
+                let rhs = s:cindex(rhs[1:])
+            endif
+            let pos = match(parts, '^cterm' . type . '\s*=')
+            if 0 <= pos
+                unlet parts[pos]
+            endif
+            call add(parts, 'cterm' . type . '=' . rhs)
+        endfor
+
+        let lines[i] = join(parts)
+        let i += 1
+    endwhile
+
+    " execute
+    let [save_z, @z] = [@z, join(lines, "\n")]
+    @z
+    let @z = save_z
 endfunction
 
 let &cpo = s:save_cpo

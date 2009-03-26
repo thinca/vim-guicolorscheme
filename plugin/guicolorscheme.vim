@@ -207,20 +207,6 @@ function! s:cindex(rgb) "{{{
     return s:color(l:r, l:g, l:b)
 endfunction "}}}
 
-function! s:HL(group, fg, bg, attr) "{{{
-    "The main highlight (HL) function
-    exec "hi clear " . a:group
-    if a:fg != ""
-        exec "hi " . a:group . " guifg=#" . a:fg . " ctermfg=" . s:cindex(a:fg)
-    endif
-    if a:bg != ""
-        exec "hi " . a:group . " guibg=#" . a:bg . " ctermbg=" . s:cindex(a:bg)
-    endif
-    if a:attr != ""
-        exec "hi " . a:group . " gui=" . a:attr . " cterm=" . a:attr
-    endif
-endfunction "}}}
-
 "}}}
 
 " Completion Helpers {{{

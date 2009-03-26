@@ -4,7 +4,7 @@
 " Modified By:   thinca <thinca@gmail.com>
 " Last Modified: 2009-03-26T22:06:48+09:00
 " Version:       1.2
-" URL:           http://www.vim.org/script.php?script_id=39
+" URL:           http://www.vim.org/script.php?script_id=1809
 "
 " Convert a GUI-only colorscheme to support 88 and 256 color terminals
 " This should also work on the GUI, so using it 100% of the time, assuming

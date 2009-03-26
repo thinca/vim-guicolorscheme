@@ -244,7 +244,7 @@ function! s:GetColorschemeFile(fname)
     endif
 endfunction
 
-command! -complete=customlist,s:Colorscheme_Complete -nargs=1 GuiColorScheme :call s:GuiColorScheme("<args>")
+command! -complete=customlist,s:Colorscheme_Complete -nargs=1 GuiColorScheme :call s:GuiColorScheme(<q-args>)
 " }}}
 
 function! s:GuiColorScheme(fname)

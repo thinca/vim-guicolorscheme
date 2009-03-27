@@ -300,14 +300,28 @@ function! s:GuiColorScheme(fname)
     let @z = save_z
 endfunction
 
-" The default values are acquired by gui_w48.c.
-let g:guicolorscheme_color_table = extend({
-  \ 'seagreen' : '#2E8B57',
-  \ 'orange' : '#FFA500',
-  \ 'purple' : '#A020F0',
-  \ 'slateblue' : '#6A5ACD',
-  \ 'violet' : '#EE82EE',
-  \ }, exists('g:guicolorscheme_color_table') ?
+" read rgb.txt (may be heavy).
+function! s:readRGBtxt()
+    let table = {}
+    let txt = globpath(&rtp, '**/rgb.txt')
+    if empty(txt)
+        return table
+    endif
+    for line in readfile(split(txt, "\n")[0])
+        if line =~ '^\s*!'
+            continue
+        endif
+        let r = split(line)
+        let rgb = call('printf', ['#%02X%02X%02X'] + r[:2])
+        for name in r[3:]
+            let table[tolower(name)] = rgb
+        endfor
+    endfor
+    return table
+endfunction
+
+let g:guicolorscheme_color_table = extend(s:readRGBtxt(),
+  \ exists('g:guicolorscheme_color_table') ?
   \ g:guicolorscheme_color_table : {})
 
 let &cpo = s:save_cpo

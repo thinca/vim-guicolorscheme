@@ -278,6 +278,15 @@ function! s:GuiColorScheme(fname)
                 continue
             endif
             let rhs = matchstr(parts[pos], '^\w*\s*=\s*\zs.*')
+            " Convert the name that there is not in cterm.
+            " Value are acquired by gui_w48.c.
+            let rhs = get({
+              \ 'seagreen' : '#2E8B57',
+              \ 'orange' : '#FFA500',
+              \ 'purple' : '#A020F0',
+              \ 'slateblue' : '#6A5ACD',
+              \ 'violet' : '#EE82EE',
+              \ }, tolower(rhs), rhs)
             if rhs =~ '#\x\{6}'
                 let rhs = s:cindex(rhs[1:])
             endif

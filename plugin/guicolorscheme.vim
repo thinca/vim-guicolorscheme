@@ -2,7 +2,7 @@
 "
 " Maintainer:    Aaron Griffin <aaron@archlinux.org>
 " Modified By:   thinca <thinca@gmail.com>
-" Last Modified: 2009-03-27T21:48:05+09:00
+" Last Modified: 2009-03-27T22:06:11+09:00
 " Version:       1.2
 " URL:           http://www.vim.org/script.php?script_id=1809
 "
@@ -10,7 +10,7 @@
 " This should also work on the GUI, so using it 100% of the time, assuming
 " you always have a non 8/16 color terminal should work fine
 
-if exists('g:loaded_guicolorscheme')
+if exists('g:loaded_guicolorscheme') || has('gui_running')
     finish
 endif
 let g:loaded_guicolorscheme = 1

@@ -2,7 +2,7 @@
 "
 " Maintainer:    Aaron Griffin <aaron@archlinux.org>
 " Modified By:   thinca <thinca@gmail.com>
-" Last Modified: 2009-03-26T22:06:48+09:00
+" Last Modified: 2009-03-27T21:48:05+09:00
 " Version:       1.2
 " URL:           http://www.vim.org/script.php?script_id=1809
 "
@@ -234,6 +234,43 @@ endfunction
 command! -complete=customlist,s:Colorscheme_Complete -nargs=1 GuiColorScheme :call s:GuiColorScheme(<q-args>)
 " }}}
 
+function! s:removeLineContinuation(lines)
+    let lines = a:lines
+    let i = 1
+    while i < len(lines)
+        if lines[i] =~ '^\s*\\'
+            let lines[i - 1] .= substitute(lines[i], '\s*\\', '', '')
+            unlet lines[i]
+        else
+            let i += 1
+        endif
+    endwhile
+    return lines
+endfunction
+
+function! s:getRuntimeSource(line)
+    let rt = matchlist(a:line, '\v^\s*:?\s*ru%[ntime]>(!?)\s+(.+)$')
+    let res = []
+    for f in split(globpath(&rtp, rt[2]), "\n")[0:0 - strlen(rt[1])]
+        let res += readfile(f)
+    endfor
+    return s:expandRuntime(res)
+endfunction
+
+function! s:expandRuntime(lines)
+    let lines = s:removeLineContinuation(a:lines)
+    let i = 0
+    while i < len(lines)
+        if lines[i] =~ '^\s*:\?\s*ru\%[ntime]\>'
+            let s = s:getRuntimeSource(lines[i])
+            let lines = lines[:i - 1] + s + lines[i + 1:]
+            let i += len(s) - 1
+        endif
+        let i += 1
+    endwhile
+    return lines
+endfunction
+
 function! s:GuiColorScheme(fname)
     let l:file = s:GetColorschemeFile(a:fname)
     if l:file == ""
@@ -245,18 +282,7 @@ function! s:GuiColorScheme(fname)
         return 0
     endif
 
-    let lines = readfile(file)
-
-    " Remove line continuation.
-    let i = 1
-    while i < len(lines)
-        if lines[i] =~ '^\s*\\'
-            let lines[i - 1] .= substitute(lines[i], '\s*\\', '', '')
-            unlet lines[i]
-        else
-            let i += 1
-        endif
-    endwhile
+    let lines = s:expandRuntime(readfile(file))
 
     let i = 0
     while i < len(lines)
